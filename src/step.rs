@@ -177,7 +177,10 @@ fn step_simulation_multisteps(
                 timestamps: Some(timestamps),
                 ..Default::default()
             };
-
+            debug_assert!(
+                timestamps_ms.len() >= num_substeps * 2 * 9,
+                "GpuTimestamps should be initialized with a bigger size"
+            );
             for i in 0..num_substeps {
                 let mut timings = [
                     &mut new_timings.grid_sort,
@@ -190,7 +193,8 @@ fn step_simulation_multisteps(
                     &mut new_timings.particles_update,
                     &mut new_timings.integrate_bodies,
                 ];
-                let times = &timestamps_ms[i * timings.len() * 2..];
+                let start_index = i * timings.len() * 2;
+                let times = &timestamps_ms[start_index..];
 
                 for (k, timing) in timings.iter_mut().enumerate() {
                     **timing += times[k * 2 + 1] - times[k * 2];
